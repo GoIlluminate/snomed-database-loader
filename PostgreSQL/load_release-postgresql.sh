@@ -99,14 +99,14 @@ echo "/* Generated Loader Script */" >  ${generatedLoadScript}
 echo "" >> ${generatedLoadScript}
 echo "set schema 'snomedct';" >> ${generatedLoadScript}
 echo "" >> ${generatedLoadScript}
-addLoadScript sct2_Concept_TYPE_INT_DATE.txt concept
-addLoadScript sct2_Description_TYPE-en_INT_DATE.txt description
-addLoadScript sct2_StatedRelationship_TYPE_INT_DATE.txt stated_relationship
-addLoadScript sct2_Relationship_TYPE_INT_DATE.txt relationship
-addLoadScript sct2_TextDefinition_TYPE-en_INT_DATE.txt textdefinition
-addLoadScript der2_cRefset_AttributeValueTYPE_INT_DATE.txt attributevaluerefset
-addLoadScript der2_cRefset_LanguageTYPE-en_INT_DATE.txt langrefset
-addLoadScript der2_cRefset_AssociationTYPE_INT_DATE.txt associationrefset
+addLoadScript sct2_Concept_TYPE_US1000124_DATE.txt concept
+addLoadScript sct2_Description_TYPE-en_US1000124_DATE.txt description
+addLoadScript sct2_StatedRelationship_TYPE_US1000124_DATE.txt stated_relationship
+addLoadScript sct2_Relationship_TYPE_US1000124_DATE.txt relationship
+addLoadScript sct2_TextDefinition_TYPE-en_US1000124_DATE.txt textdefinition
+addLoadScript der2_cRefset_AttributeValueTYPE_US1000124_DATE.txt attributevaluerefset
+addLoadScript der2_cRefset_LanguageTYPE-en_US1000124_DATE.txt langrefset
+addLoadScript der2_cRefset_AssociationTYPE_US1000124_DATE.txt associationrefset
 
 psql -U ${dbUsername} -p ${dbPortNumber} -d ${dbName} << EOF
 	\ir create-database-postgres.sql;
