@@ -108,7 +108,7 @@ addLoadScript der2_cRefset_AttributeValueTYPE_US1000124_DATE.txt attributevaluer
 addLoadScript der2_cRefset_LanguageTYPE-en_US1000124_DATE.txt langrefset
 addLoadScript der2_cRefset_AssociationTYPE_US1000124_DATE.txt associationrefset
 
-sudo docker exec -it psql-snomed psql -U ${dbUsername} -p ${dbPortNumber} -d ${dbName} postgres << EOF
+psql -U ${dbUsername} -p ${dbPortNumber} -d ${dbName} << EOF
 	\ir create-database-postgres.sql;
 	\ir environment-postgresql.sql;
 	\ir ${generatedLoadScript};
