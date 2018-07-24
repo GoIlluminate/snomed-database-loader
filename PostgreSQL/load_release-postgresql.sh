@@ -6,36 +6,27 @@ basedir="$(pwd)"
 releasePath=$1
 dbName=$2
 loadType=$3
-moduleStr=$4
-dbUsername=$5
-dbPortNumber=$6
 
-if [ -z ${moduleStr} ]
+if [ -z ${loadType} ]
 then
-	echo "Usage <release location> <db schema name> <DELTA|SNAP|FULL|ALL> <module string> [<postgres username> <postgres port>]"
+	echo "Usage <release location> <db schema name> <DELTA|SNAP|FULL|ALL>"
 	exit -1
 fi
 
-if [ -z ${dbUsername} ]
+dbUsername=postgres
+echo "Enter postgres username [$dbUsername]:"
+read newDbUsername
+if [ -n "$newDbUsername" ]
 then
-    dbUsername=postgres
-    echo "Enter postgres username [$dbUsername]:"
-    read newDbUsername
-    if [ -n "$newDbUsername" ]
-    then
-        dbUsername=$newDbUsername
-    fi
+	dbUsername=$newDbUsername
 fi
 
-if [ -z ${dbPortNumber} ]
+dbPortNumber=5432
+echo "Enter postgres port number [$dbPortNumber|:"
+read newDbPortNumber
+if [ -n "$newDbPortNumber" ]
 then
-    dbPortNumber=5432
-    echo "Enter postgres port number [$dbPortNumber|:"
-    read newDbPortNumber
-    if [ -n "$newDbPortNumber" ]
-    then
-        dbPortNumber=$newDbPortNumber
-    fi
+	dbPortNumber=$newDbPortNumber
 fi
 
 #Unzip the files here, junking the structure
@@ -83,7 +74,6 @@ function addLoadScript() {
 	for fileType in ${fileTypes[@]}; do
 		fileName=${1/TYPE/${fileType}}
 		fileName=${fileName/DATE/${releaseDate}}
-        fileName=${fileName/INT/${moduleStr}}
 
 		#Check file exists - try beta version if not
 		if [ ! -f ${localExtract}/${fileName} ]; then
@@ -109,14 +99,14 @@ echo "/* Generated Loader Script */" >  ${generatedLoadScript}
 echo "" >> ${generatedLoadScript}
 echo "set schema 'snomedct';" >> ${generatedLoadScript}
 echo "" >> ${generatedLoadScript}
-addLoadScript sct2_Concept_TYPE_INT_DATE.txt concept
-addLoadScript sct2_Description_TYPE-en_INT_DATE.txt description
-addLoadScript sct2_StatedRelationship_TYPE_INT_DATE.txt stated_relationship
-addLoadScript sct2_Relationship_TYPE_INT_DATE.txt relationship
-addLoadScript sct2_TextDefinition_TYPE-en_INT_DATE.txt textdefinition
-addLoadScript der2_cRefset_AttributeValueTYPE_INT_DATE.txt attributevaluerefset
-addLoadScript der2_cRefset_LanguageTYPE-en_INT_DATE.txt langrefset
-addLoadScript der2_cRefset_AssociationTYPE_INT_DATE.txt associationrefset
+addLoadScript sct2_Concept_TYPE_US1000124_DATE.txt concept
+addLoadScript sct2_Description_TYPE-en_US1000124_DATE.txt description
+addLoadScript sct2_StatedRelationship_TYPE_US1000124_DATE.txt stated_relationship
+addLoadScript sct2_Relationship_TYPE_US1000124_DATE.txt relationship
+addLoadScript sct2_TextDefinition_TYPE-en_US1000124_DATE.txt textdefinition
+addLoadScript der2_cRefset_AttributeValueTYPE_US1000124_DATE.txt attributevaluerefset
+addLoadScript der2_cRefset_LanguageTYPE-en_US1000124_DATE.txt langrefset
+addLoadScript der2_cRefset_AssociationTYPE_US1000124_DATE.txt associationrefset
 
 sudo docker exec -it psql-snomed psql -U ${dbUsername} -p ${dbPortNumber} -d ${dbName} postgres << EOF
 	\ir create-database-postgres.sql;
