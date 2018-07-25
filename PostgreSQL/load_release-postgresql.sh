@@ -2,13 +2,13 @@
 set -e;
 
 cd "`dirname "$0"`"
-basedir="$(pwd)"
+baseDir="$(pwd)"
 releasePath=$1
 dbName=$2
-loadType=$3
+releaseType=$3
 moduleStr=$4
 dbUsername=$5
-dbPortNumber=$6
+dbPort=$6
 
 if [ -z ${moduleStr} ]
 then
@@ -27,14 +27,14 @@ then
     fi
 fi
 
-if [ -z ${dbPortNumber} ]
+if [ -z ${dbPort} ]
 then
-    dbPortNumber=5432
-    echo "Enter postgres port number [$dbPortNumber|:"
+    dbPort=5432
+    echo "Enter postgres port number [$dbPort|:"
     read newDbPortNumber
     if [ -n "$newDbPortNumber" ]
     then
-        dbPortNumber=$newDbPortNumber
+        dbPort=$newDbPortNumber
     fi
 fi
 
@@ -44,7 +44,7 @@ generatedLoadScript="tmp_loader.sql"
 generatedEnvScript="tmp_environment-postgresql.sql"
 
 #What types of files are we loading - delta, snapshot, full or all?
-case "${loadType}" in 
+case "${releaseType}" in 
 	'DELTA') fileTypes=(Delta)
 		unzip -j ${releasePath} "*Delta*" -d ${localExtract}
 	;;
@@ -57,7 +57,7 @@ case "${loadType}" in
 	'ALL') fileTypes=(Delta Snapshot Full)	
 		unzip -j ${releasePath} -d ${localExtract}
 	;;
-	*) echo "File load type ${loadType} not recognised"
+	*) echo "Release type ${releaseType} not recognised"
 	exit -1;
 	;;
 esac
@@ -69,7 +69,7 @@ releaseDate=`ls -1 ${localExtract}/*.txt | head -1 | egrep -o '[0-9]{8}'`
 #Generate the environemnt script by running through the template as 
 #many times as required
 #now=`date +"%Y%m%d_%H%M%S"`
-#echo -e "\nGenerating Environment script for ${loadType} type(s)"
+#echo -e "\nGenerating Environment script for ${releaseType} type(s)"
 #echo "/* Script Generated Automatically by load_release.sh ${now} */" > ${generatedEnvScript}
 #for fileType in ${fileTypes[@]}; do
 #	fileTypeLetter=`echo "${fileType}" | head -c 1 | tr '[:upper:]' '[:lower:]'`
@@ -97,7 +97,7 @@ function addLoadScript() {
 
 		tableName=${2}_`echo $fileType | head -c 1 | tr '[:upper:]' '[:lower:]'`
 
-		echo -e "\\COPY ${tableName} FROM '"${basedir}/${localExtract}/${fileName}"' WITH (FORMAT csv, HEADER true, DELIMITER E'	', QUOTE E'\b');" >> ${generatedLoadScript}
+		echo -e "\\COPY ${tableName} FROM '"${baseDir}/${localExtract}/${fileName}"' WITH (FORMAT csv, HEADER true, DELIMITER E'	', QUOTE E'\b');" >> ${generatedLoadScript}
 		echo -e ""  >> ${generatedLoadScript}
 	done
 }
@@ -116,7 +116,7 @@ addLoadScript der2_cRefset_AttributeValueTYPE_INT_DATE.txt attributevaluerefset
 addLoadScript der2_cRefset_LanguageTYPE-en_INT_DATE.txt langrefset
 addLoadScript der2_cRefset_AssociationTYPE_INT_DATE.txt associationrefset
 
-psql -h localhost -U ${dbUsername} -p ${dbPortNumber} -d ${dbName} << EOF
+psql -h localhost -U ${dbUsername} -p ${dbPort} -d ${dbName} << EOF
 	\ir create-database-postgres.sql;
 	\ir environment-postgresql.sql;
 	\ir ${generatedLoadScript};
