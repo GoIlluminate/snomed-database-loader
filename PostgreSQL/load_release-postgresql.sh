@@ -38,12 +38,12 @@ then
     fi
 fi
 
-#Unzip the files here, junking the structure
+# Unzip the files here, junking the structure
 localExtract="tmp_extracted"
 generatedLoadScript="tmp_loader.sql"
 generatedEnvScript="tmp_environment-postgresql.sql"
 
-#What types of files are we loading - delta, snapshot, full or all?
+# What types of files are we loading - delta, snapshot, full or all?
 case "${releaseType}" in 
 	'DELTA') fileTypes=(Delta)
 		unzip -j ${releasePath} "*Delta*" -d ${localExtract}
@@ -63,21 +63,8 @@ case "${releaseType}" in
 esac
 
 	
-#Determine the release date from the filenames
+# Determine the release date from the filenames
 releaseDate=`ls -1 ${localExtract}/*.txt | head -1 | egrep -o '[0-9]{8}'`	
-
-#Generate the environemnt script by running through the template as 
-#many times as required
-#now=`date +"%Y%m%d_%H%M%S"`
-#echo -e "\nGenerating Environment script for ${releaseType} type(s)"
-#echo "/* Script Generated Automatically by load_release.sh ${now} */" > ${generatedEnvScript}
-#for fileType in ${fileTypes[@]}; do
-#	fileTypeLetter=`echo "${fileType}" | head -c 1 | tr '[:upper:]' '[:lower:]'`
-#	tail -n +2 environment-postgresql-mysql.sql | while read thisLine
-#	do
-#		echo "${thisLine/TYPE/${fileTypeLetter}}" >> ${generatedEnvScript}
-#	done
-#done
 
 function addLoadScript() {
 	for fileType in ${fileTypes[@]}; do
@@ -85,7 +72,7 @@ function addLoadScript() {
 		fileName=${fileName/DATE/${releaseDate}}
         fileName=${fileName/INT/${moduleStr}}
 
-		#Check file exists - try beta version if not
+		# Check file exists - try beta version if not
 		if [ ! -f ${localExtract}/${fileName} ]; then
 			origFilename=${fileName}
 			fileName="x${fileName}"
@@ -123,4 +110,4 @@ psql -h localhost -U ${dbUsername} -p ${dbPort} -d ${dbName} << EOF
 EOF
 
 rm -rf $localExtract
-#We'll leave the generated environment & load scripts for inspection
+# We'll leave the generated environment & load scripts for inspection
