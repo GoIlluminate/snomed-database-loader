@@ -16,28 +16,6 @@ then
 	exit -1
 fi
 
-if [ -z ${dbUsername} ]
-then
-    dbUsername=postgres
-    echo "Enter postgres username [$dbUsername]:"
-    read newDbUsername
-    if [ -n "$newDbUsername" ]
-    then
-        dbUsername=$newDbUsername
-    fi
-fi
-
-if [ -z ${dbPort} ]
-then
-    dbPort=5432
-    echo "Enter postgres port number [$dbPort|:"
-    read newDbPortNumber
-    if [ -n "$newDbPortNumber" ]
-    then
-        dbPort=$newDbPortNumber
-    fi
-fi
-
 # Unzip the files here, junking the structure
 localExtract="tmp_extracted"
 generatedLoadScript="tmp_loader.sql"
@@ -84,6 +62,7 @@ function addLoadScript() {
 
 		tableName=${2}_`echo $fileType | head -c 1 | tr '[:upper:]' '[:lower:]'`
 
+        # \copy must be entirely on one line
 		echo -e "\\COPY ${tableName} FROM '"${baseDir}/${localExtract}/${fileName}"' WITH (FORMAT csv, HEADER true, DELIMITER E'	', QUOTE E'\b');" >> ${generatedLoadScript}
 		echo -e ""  >> ${generatedLoadScript}
 	done
