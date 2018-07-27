@@ -53,6 +53,7 @@ function showHelp() {
     echo ""
     echo "Create and populate a PostgreSQL database with a SNOMED CT terminology release."
     echo ""
+    echo ""
     echo "== Configurations (required) =="
     echo ""
     echo "SNOMED CT release configurations:"
@@ -67,6 +68,7 @@ function showHelp() {
     echo "  -h        database server host or socket directory"
     echo "  -p        database server port"
     echo "  -u        database user name"
+    echo ""
     echo ""
     echo "== Other (optional) =="
     echo ""
@@ -87,7 +89,7 @@ while getopts ":d:h:Hl:m:p:t:u:" opt; do
             showHelp
             ;;
         l )
-            releasePath="`dirname "$OPTARG"`"
+            releasePath="`realpath "$OPTARG"`"
             ;;
         m )
             moduleName=$OPTARG
@@ -102,7 +104,7 @@ while getopts ":d:h:Hl:m:p:t:u:" opt; do
             dbUsername=$OPTARG
             ;;
         : ) # missing option argument
-            showErrorMessage "Option -$OPTARG requires $(getConfigDescription $OPTARG) as an argument."
+            showErrorMessage "Option '$OPTARG' requires $(getConfigDescription $OPTARG) as an argument."
 
             exit -1
             ;;
@@ -168,7 +170,6 @@ then
         errMsg="$errMsg $desc"
     done
 
-    # TODO: fix
     showErrorMessage "$errMsg"
     
     exit -1
