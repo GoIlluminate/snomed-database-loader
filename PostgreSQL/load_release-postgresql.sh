@@ -111,6 +111,9 @@ while getopts ":d:h:Hl:m:p:t:u:" opt; do
 
         \? ) # invalid option
             showErrorMessage "$scriptName: invalid option -- '$OPTARG'"
+
+            echo "Continuing anyway..."
+            echo ""
             ;;
     esac
 done
@@ -248,5 +251,9 @@ psql -h ${dbHost} -U ${dbUsername} -p ${dbPort} -d ${dbName} << EOF
 	\ir ${generatedLoadScript};
 EOF
 
+echo ""
+echo "Removing extracted files..."
 rm -rf $localExtract
+echo "Extracted files removed."
+
 # We'll leave the generated environment & load scripts for inspection
