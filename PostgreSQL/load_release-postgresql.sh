@@ -115,43 +115,43 @@ done
 
 declare -a missingConfigDescs
 
-function addConfigDescFlag() {
-    missingConfigDescs=("${missingConfigDescs[@]}" "$(getConfigDescription $1)")
+function addConfigDesc() {
+    missingConfigDescs=("${missingConfigDescs[@]}" "\n  - $(getConfigDescription $1)")
 }
 
 # Check for missing configurations
 
-if [ $releasePath ]
+if [ ! $releasePath ]
 then
     addConfigDesc "l"
 fi
 
-if [ $moduleName ]
+if [ ! $moduleName ]
 then
     addConfigDesc "m"
 fi
 
-if [ $releaseType ]
+if [ ! $releaseType ]
 then
     addConfigDesc "t"
 fi
 
-if [ $dbName ]
+if [ ! $dbName ]
 then
     addConfigDesc "d"
 fi
 
-if [ $dbHost ]
+if [ ! $dbHost ]
 then
     addConfigDesc "h"
 fi
 
-if [ $dbPort ]
+if [ ! $dbPort ]
 then
     addConfigDesc "p"
 fi
 
-if [ $dbUsername ]
+if [ ! $dbUsername ]
 then
     addConfigDesc "u"
 fi
@@ -165,10 +165,11 @@ then
 
     for desc in ${missingConfigDescs[@]}
     do
-        errMsg="$errMsg\n  * $desc"
+        errMsg="$errMsg $desc"
     done
 
-    showErrorMessage $errMsg
+    # TODO: fix
+    showErrorMessage "$errMsg"
     
     exit -1
 fi
