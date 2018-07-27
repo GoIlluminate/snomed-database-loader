@@ -1,22 +1,78 @@
 #!/bin/bash
 set -e;
 
+scriptName=$0
+
 cd "`dirname "$0"`"
 baseDir="$(pwd)"
 
 # lookit all these variables for configurations
 declare releasePath
-declare releaseType
 declare moduleName
+declare releaseType
 declare dbName
 declare dbHost
 declare dbPort
 declare dbUsername
 
 function showErrorMessage() {
-    echo "$1"
+    echo -e "$1"
     echo ""
-    echo "Try '$0 -H' for more information."
+    echo "Try '$scriptName -H' for more information."
+}
+
+function getConfigDescription() {
+    case $1 in
+        d )
+            echo "the database name"
+            ;;
+        h )
+            echo "the database server host or socket directory"
+            ;;
+        l )
+            echo "the path to the SNOMED archive"
+            ;;
+        m )
+            echo "the name of the SNOMED module"
+            ;;
+        p )
+            echo "the database server port"
+            ;;
+        t )
+            echo "the type of the SNOMED release"
+            ;;
+        u )
+            echo "the database user name"
+            ;;
+    esac
+}
+
+function showHelp() {
+    echo "Usage: $scriptName CONFIGURATIONS"
+    echo "  or:  $scriptName -H"
+    echo ""
+    echo "Create and populate a PostgreSQL database with a SNOMED CT terminology release."
+    echo ""
+    echo "== Configurations (required) =="
+    echo ""
+    echo "SNOMED CT release configurations:"
+    echo "  -l        release archive location"
+    echo "  -m        module name (e.g. INT, US1000124)"
+    echo "  -t        release type"
+    echo "               options are DELTA, SNAP, FULL, or ALL"
+    echo "               SNAP is for snapshot, and ALL is for delta, snapshot, and full"
+    echo ""
+    echo "Database configurations:"
+    echo "  -d        database name to connect to"
+    echo "  -h        database server host or socket directory"
+    echo "  -p        database server port"
+    echo "  -u        database user name"
+    echo ""
+    echo "== Other (optional) =="
+    echo ""
+    echo "  -H        display this help and exit"
+
+    exit 1
 }
 
 while getopts ":d:h:Hl:m:p:t:u:" opt; do
@@ -28,31 +84,7 @@ while getopts ":d:h:Hl:m:p:t:u:" opt; do
             dbHost=$OPTARG
             ;;
         H )
-            echo "Usage: $0 CONFIGURATIONS"
-            echo "  or:  $0 -H"
-            echo ""
-            echo "Create and populate a PostgreSQL database with a SNOMED CT terminology release."
-            echo ""
-            echo "== Configurations (required) =="
-            echo ""
-            echo "SNOMED CT release configurations:"
-            echo "  -l        release archive location"
-            echo "  -m        module name (e.g. INT, US1000124)"
-            echo "  -t        release type"
-            echo "               options are DELTA, SNAP, FULL, or ALL"
-            echo "               SNAP is for snapshot, and ALL is for delta, snapshot, and full"
-            echo ""
-            echo "Database configurations:"
-            echo "  -d        database name to connect to"
-            echo "  -h        database server host or socket directory"
-            echo "  -p        database server port"
-            echo "  -u        database user name"
-            echo ""
-            echo "== Other (optional)"
-            echo ""
-            echo "  -H        display this help and exit"
-
-            exit 1
+            showHelp
             ;;
         l )
             releasePath="`dirname "$OPTARG"`"
@@ -70,43 +102,76 @@ while getopts ":d:h:Hl:m:p:t:u:" opt; do
             dbUsername=$OPTARG
             ;;
         : ) # missing option argument
-            declare missingArgDesc
-
-            case ${OPTARG} in
-                d )
-                    missingArgDesc="the database name"
-                    ;;
-                h )
-                    missingArgDesc="the database server host or socket directory"
-                    ;;
-                l )
-                    missingArgDesc="the path to the SNOMED archive"
-                    ;;
-                m )
-                    missingArgDesc="the name of the SNOMED module"
-                    ;;
-                p )
-                    missingArgDesc="the database server port"
-                    ;;
-                t )
-                    missingArgDesc="the type of the SNOMED release"
-                    ;;
-                u )
-                    missingArgDesc="the database user name"
-                    ;;
-            esac
-
-            showErrorMessage "Option -$OPTARG requires $missingArgDesc as an argument."
+            showErrorMessage "Option -$OPTARG requires $(getConfigDescription $OPTARG) as an argument."
 
             exit -1
             ;;
 
         \? ) # invalid option
-            showErrorMessage "$0: invalid option -- '$OPTARG'"
+            showErrorMessage "$scriptName: invalid option -- '$OPTARG'"
             ;;
     esac
 done
 
+declare -a missingConfigDescs
+
+function addConfigDescFlag() {
+    missingConfigDescs=("${missingConfigDescs[@]}" "$(getConfigDescription $1)")
+}
+
+# Check for missing configurations
+
+if [ $releasePath ]
+then
+    addConfigDesc "l"
+fi
+
+if [ $moduleName ]
+then
+    addConfigDesc "m"
+fi
+
+if [ $releaseType ]
+then
+    addConfigDesc "t"
+fi
+
+if [ $dbName ]
+then
+    addConfigDesc "d"
+fi
+
+if [ $dbHost ]
+then
+    addConfigDesc "h"
+fi
+
+if [ $dbPort ]
+then
+    addConfigDesc "p"
+fi
+
+if [ $dbUsername ]
+then
+    addConfigDesc "u"
+fi
+
+# If any configurations were missing, list them in an error message and exit
+
+if [ ${#missingConfigDescs[@]} != 0 ]
+then 
+    errMsg="Error: missing necessary configuration options."
+    errMsg="$errMsg\nThe following information was not provided:"
+
+    for desc in ${missingConfigDescs[@]}
+    do
+        errMsg="$errMsg\n  * $desc"
+    done
+
+    showErrorMessage $errMsg
+    
+    exit -1
+fi
 
 
 # Unzip the files here, junking the structure
