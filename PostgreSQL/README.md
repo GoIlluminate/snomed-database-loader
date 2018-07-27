@@ -20,9 +20,7 @@ PostgreSQL is an [`ORDBMS`](http://en.wikipedia.org/wiki/ORDBMS); therefore, eve
 
 ## Scripted Installation (Mac & Unix)
 
-Run `./load_release-postgresql.sh -l <release location> -m <module name> -t <release type> -d <database name> -h <database host> -p <database port> -u <database user name>`
-
-### Explanation of flags
+`./load_release-postgresql.sh -l <release location> -m <module name> -t <release type> -d <database name> -h <database host> -p <database port> -u <database user name>`
 
 All of the flags listed below must be used for the script to run.
 
