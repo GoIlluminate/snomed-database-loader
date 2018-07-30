@@ -108,7 +108,6 @@ while getopts ":d:h:Hl:m:p:t:u:" opt; do
 
             exit -1
             ;;
-
         \? ) # invalid option
             showErrorMessage "$scriptName: invalid option -- '$OPTARG'"
 
@@ -118,48 +117,26 @@ while getopts ":d:h:Hl:m:p:t:u:" opt; do
     esac
 done
 
+# Missing configurations' descriptions
 declare -a missingConfigDescs
 
-function addConfigDesc() {
-    missingConfigDescs=("${missingConfigDescs[@]}" "\n  - $(getConfigDescription $1)")
+function checkConfigExists() {
+    if [ -z $1 ]
+    then
+        # add description of missing configuration to list
+        missingConfigDescs=("${missingConfigDescs[@]}" "\n  - $(getConfigDescription $2)")
+    fi
 }
 
 # Check for missing configurations
 
-if [ ! $releasePath ]
-then
-    addConfigDesc "l"
-fi
-
-if [ ! $moduleName ]
-then
-    addConfigDesc "m"
-fi
-
-if [ ! $releaseType ]
-then
-    addConfigDesc "t"
-fi
-
-if [ ! $dbName ]
-then
-    addConfigDesc "d"
-fi
-
-if [ ! $dbHost ]
-then
-    addConfigDesc "h"
-fi
-
-if [ ! $dbPort ]
-then
-    addConfigDesc "p"
-fi
-
-if [ ! $dbUsername ]
-then
-    addConfigDesc "u"
-fi
+checkConfigExists "$releasePath" "l"
+checkConfigExists "$moduleName" "m"
+checkConfigExists "$releaseType" "t"
+checkConfigExists "$dbName" "d"
+checkConfigExists "$dbHost" "h"
+checkConfigExists "$dbPort" "p"
+checkConfigExists "$dbUsername" "u"
 
 # If any configurations were missing, list them in an error message and exit
 
@@ -217,6 +194,7 @@ function addLoadScript() {
 		if [ ! -f ${localExtract}/${fileName} ]; then
 			origFilename=${fileName}
 			fileName="x${fileName}"
+
 			if [ ! -f ${localExtract}/${fileName} ]; then
 				echo "Unable to find ${origFilename} or beta version"
 				exit -1
@@ -236,6 +214,7 @@ echo "/* Generated Loader Script */" >  ${generatedLoadScript}
 echo "" >> ${generatedLoadScript}
 echo "set schema 'snomedct';" >> ${generatedLoadScript}
 echo "" >> ${generatedLoadScript}
+
 addLoadScript sct2_Concept_TYPE_INT_DATE.txt concept
 addLoadScript sct2_Description_TYPE-en_INT_DATE.txt description
 addLoadScript sct2_StatedRelationship_TYPE_INT_DATE.txt stated_relationship
@@ -253,7 +232,9 @@ EOF
 
 echo ""
 echo "Removing extracted files..."
+
 rm -rf $localExtract
+
 echo "Extracted files removed."
 
 # We'll leave the generated environment & load scripts for inspection
