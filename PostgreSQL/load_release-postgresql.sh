@@ -194,7 +194,7 @@ function addLoadScript() {
 	for fileType in ${fileTypes[@]}; do
 		fileName=${1/TYPE/${fileType}}
 		fileName=${fileName/DATE/${releaseDate}}
-        fileName=${fileName/INT/${moduleName}}
+        fileName=${fileName/MODULE/${moduleName}}
 
 		# Check file exists - try beta version if not
 		if [ ! -f ${localExtract}/${fileName} ]; then
@@ -221,14 +221,18 @@ echo "" >> ${generatedLoadScript}
 echo "set schema 'snomedct';" >> ${generatedLoadScript}
 echo "" >> ${generatedLoadScript}
 
-addLoadScript sct2_Concept_TYPE_INT_DATE.txt concept
-addLoadScript sct2_Description_TYPE-en_INT_DATE.txt description
-addLoadScript sct2_StatedRelationship_TYPE_INT_DATE.txt stated_relationship
-addLoadScript sct2_Relationship_TYPE_INT_DATE.txt relationship
-addLoadScript sct2_TextDefinition_TYPE-en_INT_DATE.txt textdefinition
-addLoadScript der2_cRefset_AttributeValueTYPE_INT_DATE.txt attributevaluerefset
-addLoadScript der2_cRefset_LanguageTYPE-en_INT_DATE.txt langrefset
-addLoadScript der2_cRefset_AssociationTYPE_INT_DATE.txt associationrefset
+addLoadScript sct2_Concept_TYPE_MODULE_DATE.txt concept
+addLoadScript sct2_Description_TYPE-en_MODULE_DATE.txt description
+addLoadScript sct2_StatedRelationship_TYPE_MODULE_DATE.txt stated_relationship
+addLoadScript sct2_Relationship_TYPE_MODULE_DATE.txt relationship
+addLoadScript sct2_TextDefinition_TYPE-en_MODULE_DATE.txt textdefinition
+addLoadScript der2_cRefset_AttributeValueTYPE_MODULE_DATE.txt attributevaluerefset
+addLoadScript der2_cRefset_LanguageTYPE-en_MODULE_DATE.txt langrefset
+addLoadScript der2_cRefset_AssociationTYPE_MODULE_DATE.txt associationrefset
+addLoadScript der2_Refset_SimpleTYPE_MODULE_DATE.txt simplerefset
+addLoadScript der2_iissscRefset_ComplexMapTYPE_MODULE_DATE.txt complexmaprefset
+addLoadScript der2_sRefset_SimpleMapTYPE_MODULE_DATE.txt simplemaprefset
+addLoadScript der2_iisssccRefset_ExtendedMapTYPE_MODULE_DATE.txt extendedmaprefset
 
 psql -h ${dbHost} -U ${dbUsername} -p ${dbPort} -d ${dbName} << EOF
 	\ir create-database-postgres.sql;
