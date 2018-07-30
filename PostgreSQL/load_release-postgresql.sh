@@ -163,21 +163,27 @@ generatedEnvScript="tmp_environment-postgresql.sql"
 
 # What types of files are we loading - delta, snapshot, full or all?
 case "${releaseType}" in 
-	'DELTA') fileTypes=(Delta)
+	'DELTA') 
+        fileTypes=(Delta)
 		unzip -j ${releasePath} "*Delta*" -d ${localExtract}
-	;;
-	'SNAP') fileTypes=(Snapshot)
+        ;;
+	'SNAP') 
+        fileTypes=(Snapshot)
 		unzip -j ${releasePath} "*Snapshot*" -d ${localExtract}
-	;;
-	'FULL') fileTypes=(Full)
+        ;;
+	'FULL') 
+        fileTypes=(Full)
 		unzip -j ${releasePath} "*Full*" -d ${localExtract}
-	;;
-	'ALL') fileTypes=(Delta Snapshot Full)	
+        ;;
+	'ALL') 
+        fileTypes=(Delta Snapshot Full)	
 		unzip -j ${releasePath} -d ${localExtract}
-	;;
-	*) echo "Release type '${releaseType}' not recognised"
-	exit -1;
-	;;
+        ;;
+	*) 
+        showErrorMessage "Release type '${releaseType}' not recognised"
+
+        exit -1;
+        ;;
 esac
 
 	
