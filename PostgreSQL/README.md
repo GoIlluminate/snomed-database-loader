@@ -8,16 +8,6 @@ SQL scripts to create and populate a PostgreSQL database with a SNOMED CT termin
 
 - PostgreSQL v9
 
-# Creating the SNOMED CT schema on PostgreSQL
-
-PostgreSQL is an [`ORDBMS`](http://en.wikipedia.org/wiki/ORDBMS); therefore, every database is a self-contained object. A database contains logins, groups, one or more schemas, etc., and every connection is related to a single database.
-
-## Differences from the MySQL version
-
-- Does not need `engine=myisam`, which by itself is a bit strange, as `myisam` does not support foreign keys.
-- Changes `database` for `schema`
-- Uses the `unique` constraint instead of `key`
-
 ## Scripted Installation (Mac & Unix)
 
 `./load_release-postgresql.sh -l <release location> -m <module name> -t <release type> -d <database name> -h <database host> -p <database port> -u <database user name>`
@@ -41,8 +31,11 @@ Run `./load_release-postgresql.sh -H` to see the help menu.
 
 ## Manual Installation
 
-1. Download the SNOMED CT terminology release from the IHTSDO website
-2. Create the database using the db create-database-postgres.sql script or skip/perform this action manually if you'd like the data to be loaded into an existing/different database.
-3. Create the tables using the db appropriate environment.sql script. The default file creates tables for full, snapshot and delta files and there's also a -full-only version.
-4. Edit the db appropriate load.sql script with the correct location of the SNOMED CT release files An alternative under unix or mac would be to create a symlink to the appropriate directory eg `ln -s /your/snomed/directory RF2Release`
-5. Load the database that was created using the edited `load.sql` script from the relevant command prompt, again by default for full, snapshot, and delta, unless you only want the full version.
+1. Download the SNOMED CT terminology release from the IHTSDO website.
+2. Create the database using the `create-database-postgres.sql` script.
+  * Skip this step or perform it manually if you'd like the data to be loaded into an existing database or a different one than the script specifies.
+3. Create the tables using the `environment-postgresql.sql` script.
+  * Currently, this script only creates tables for full files.
+4. Update the `load-postgresql.sql` script as specified in its comments so it will work with your release files.
+  * Instead of editing the location of the release files in the SQL script, you can create a symlink that points to the appropriate directory (e.g. `ln -s /your/snomed/directory RF2Release`).
+5. Load the database that was created using the edited load script (in step 4) from the relevant command prompt.
