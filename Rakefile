@@ -43,7 +43,7 @@ def get_loader_arguments(calling_task_name)
       args[:module_name] = module_name;
     end
 
-    flags.on('-t', '--release-type RELEASE', 'The type of the SNOMED release (DELTA, SNAP, FULL, or ALL)') do |release_type|
+    flags.on('-t', '--release-type RELEASE', [:DELTA, :SNAP, :FULL, :ALL], 'The type of the SNOMED release (DELTA, SNAP, FULL, or ALL)') do |release_type|
       args[:release_type] = release_type;
     end
 
@@ -68,13 +68,13 @@ def get_loader_arguments(calling_task_name)
     end
 
     flags.on('-H', '--help', 'Display this help and exit') do
-      puts args
+      puts flags
       exit
     end
   end
 
   # parse the command-line arguments
-  parser.parse!
+  parser.parse
 
   def find_missing_arguments(args)
     arg_descriptions = {
