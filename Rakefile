@@ -6,6 +6,18 @@ require 'rbconfig'
 
 @os = RbConfig::CONFIG['host_os']
 
+# configurations for SNOMED CT import
+configurations = {
+  release_path: nil,
+  module_name: nil,
+  release_type: nil,
+  db_name: nil,
+  db_host: nil,
+  db_port: nil,
+  db_username: nil,
+  db_password: nil
+};
+
 def docker_command
     if @os.downcase.include?('linux')
         return "sudo docker"
@@ -14,23 +26,12 @@ def docker_command
     end
 end
 
-def get_loader_arguments(calling_task_name)
+def get_configurations(args, calling_task_name)
   def show_error_message(message, rake_task)
     puts "\n" + message
     puts "\nTry 'rake #{rake_task} --help' for more information."
     # TODO: fix this command - this doesn't actually show the help
   end
-
-  args = {
-    release_path: nil,
-    module_name: nil,
-    release_type: nil,
-    db_name: nil,
-    db_host: nil,
-    db_port: nil,
-    db_username: nil,
-    db_password: nil
-  };
 
   parser = OptionParser.new do|flags|
     flags.banner = "Usage: rake #{calling_task_name} -- ARGS"
@@ -116,20 +117,22 @@ def get_loader_arguments(calling_task_name)
   args
 end
 
-task :default => [:postgres_build, :postgres_run]
+task :default => [:get_configurations, :postgres_build, :postgres_run]
+
+task :get_configurations do |task_name|
+  configurations = get_configurations(configurations, task_name)
+end
 
 task :postgres_build do 
     sh("#{docker_command} build -t snomedps:latest .")
 end
 
-task :postgres_run do |task_name|
+task :postgres_run do
     containerID = `#{docker_command} ps -a -q -f name=snomedps`
 
     if containerID != ""
         sh("#{docker_command} stop $(#{docker_command} ps -a -q -f name=snomedps) && #{docker_command} rm $(#{docker_command} ps -a -q -f name=snomedps);")
     end
-
-    args = get_loader_arguments(task_name)
 
     sh("#{docker_command} run --name snomedps -d -e POSTGRES_USER=#{args[:db_username]} -e POSTGRES_PASS=#{args[:db_password]} -e POSTGRES_DATABASE=#{args[:db_name]} -p 5432:#{args[:db_port]} snomedps")
     sh("#{docker_command} exec snomedps ../scripts/load_release-postgresql.sh -l #{args[:release_path]} -m #{args[:module_name]} -t #{args[:release_type]} -d #{args[:db_name]} -h #{args[:db_host]} -p 5432 -u #{args[:db_username]}")
