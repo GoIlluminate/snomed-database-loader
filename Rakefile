@@ -17,6 +17,7 @@ def docker_command
     end
 end
 
+# really just confirms that all of the configuration values are present
 def validate_configurations(configurations, calling_task_name)
   def show_error_message(message, task_name)
     abort("\n" + message + "\n\nTry 'rake -- #{task_name} --help' for more information.\n")
@@ -51,7 +52,7 @@ def validate_configurations(configurations, calling_task_name)
   end
 end
 
-# TODO: Remove :get_configurations? I want it to run first so we don't bother building if we don't have all the configs, but maybe that's overkill
+# TODO: Remove :get_configurations? I want it to run first so we don't bother building if we don't have all the configs, but maybe that's overkill - it's a dependency for postgres_run
 task :default => [:get_configurations, :postgres_build, :postgres_run]
 
 task :get_configurations do |task_name|
