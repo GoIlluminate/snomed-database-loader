@@ -9,7 +9,7 @@ require 'rbconfig'
 # configurations for SNOMED CT import
 configs = {
   # the location of the SNOMED release archive in the Docker container
-  docker_release_path: "/snomed/SnomedCT.zip"
+  docker_release_path: "/scripts/snomed/SnomedCT.zip"
 }
 
 def docker_command
@@ -55,8 +55,7 @@ def validate_configurations(configurations, calling_task_name)
   end
 end
 
-# TODO: Remove :get_configurations? I want it to run first so we don't bother building if we don't have all the configs, but maybe that's overkill - it's a dependency for postgres_run
-task :default => [:get_configurations, :postgres_build, :postgres_run]
+task :default => [:postgres_build, :postgres_run]
 
 task :get_configurations do |task_name|
   parser = OptionParser.new do |flags|
@@ -139,7 +138,7 @@ task :get_configurations do |task_name|
   validate_configurations(configs, task_name)
 end
 
-task :postgres_build do 
+task :postgres_build => [:get_configurations] do 
     sh("#{docker_command} build -t snomedps:latest --build-arg local_release_path=#{configs[:local_release_path]} --build-arg docker_release_path=#{configs[:docker_release_path]} .")
 end
 
@@ -152,6 +151,6 @@ task :postgres_run => [:get_configurations] do
       sh("#{docker_command} stop $(#{docker_command} ps -a -q -f name=snomedps) && #{docker_command} rm $(#{docker_command} ps -a -q -f name=snomedps);")
     end
 
-    sh("#{docker_command} run --name snomedps -d -e POSTGRES_USER=#{configs[:db_username]} -e POSTGRES_PASS=#{configs[:db_password]} -e POSTGRES_DATABASE=#{configs[:db_name]} -p #{configs[:db_port]}:5432 snomedps")
+    sh("#{docker_command} run --name snomedps -d -e POSTGRES_USER=#{configs[:db_username]} -e POSTGRES_PASS=#{configs[:db_password]} -e POSTGRES_DB=#{configs[:db_name]} -p #{configs[:db_port]}:5432 snomedps")
     sh("#{docker_command} exec snomedps ../scripts/load_release-postgresql.sh -l #{configs[:docker_release_path]} -m #{configs[:module_name]} -t #{configs[:release_type]} -d #{configs[:db_name]} -h #{configs[:db_host]} -p #{configs[:db_port]} -u #{configs[:db_username]}")
 end
