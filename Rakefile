@@ -9,7 +9,15 @@ require 'rbconfig'
 # configurations for SNOMED CT import
 configs = {
   # the location of the SNOMED release archive in the Docker container
-  docker_release_path: "/scripts/snomed/SnomedCT.zip"
+  docker_release_path: "/scripts/snomed/SnomedCT.zip",
+  local_release_path: nil,
+  module_name: nil,
+  release_type: nil,
+  db_name: nil,
+  db_host: nil,
+  db_port: nil,
+  db_username: nil,
+  db_password: nil
 }
 
 def docker_command
@@ -23,7 +31,7 @@ end
 # really just confirms that all of the configuration values are present
 def validate_configurations(configurations, calling_task_name)
   def show_error_message(message, task_name)
-    abort("\n" + message + "\n\nTry 'rake -- #{task_name} --help' for more information.\n")
+    abort("\n" + message + "\n\nTry 'rake config_help' for more information.\n")
   end
 
   config_descriptions = {
@@ -57,83 +65,56 @@ end
 
 task :default => [:postgres_build, :postgres_run]
 
+task :config_help do
+  # TODO: please please please keep this usage line updated if anything ever changes
+  puts "Usage: rake CONFIG_ENV_VARS"
+  puts ""
+  puts "Create and populate a PostgreSQL database with a SNOMED CT terminology release."
+  puts ""
+  puts ""
+  puts "== Configurations (required) =="
+  puts ""
+  puts "SNOMED CT release configurations:"
+  puts "  release_path=PATH           The path to the SNOMED CT release archive"
+  puts "  module_name=MODULE_NAME     The name of the SNOMED module"
+  puts "  release_type=RELEASE        The type of the SNOMED release (DELTA, SNAP, FULL, or ALL)"
+  puts ""
+  puts "Database configurations:"
+  puts "  db_name=DBNAME              The database name to connect to"
+  puts "  db_host=HOSTNAME            The database server host or socket directory"
+  puts "  db_port=PORT                The database server port"
+  puts "  db_username=USERNAME        The database user name"
+  puts "  db_password=PASSWORD        The database password"
+end
+
 task :get_configurations do |task_name|
-  parser = OptionParser.new do |flags|
-    flags.banner = "Usage: rake -- #{task_name} CONFIGURATIONS"
-    flags.separator ""
-    flags.separator "Create and populate a PostgreSQL database with a SNOMED CT terminology release."
-    flags.separator ""
-    flags.separator ""
-    flags.separator "== Configurations (required) =="
-    flags.separator ""
-    flags.separator "SNOMED CT release configurations:"
+  # environment variables are deleted afterwards so you have to explicitly set them every time
+  configs[:local_release_path] = ENV['release_path']
+  ENV['release_path'] = nil
 
-    configs[:local_release_path] = nil
+  configs[:module_name] = ENV['module_name']
+  ENV['module_name'] = nil
 
-    flags.on('-l', '--release-path PATH', 'The path to the SNOMED CT release archive') do |release_path|
-      configs[:local_release_path] = release_path;
-    end
+  configs[:release_type] = ENV['release_type']
+  ENV['release_type'] = nil
 
-    configs[:module_name] = nil
+  configs[:db_name] = ENV['db_name']
+  ENV['db_name'] = nil
 
-    flags.on('-m', '--module MODULE_NAME', 'The name of the SNOMED module') do |module_name|
-      configs[:module_name] = module_name;
-    end
+  configs[:db_host] = ENV['db_host']
+  ENV['db_host'] = nil
 
-    configs[:release_type] = nil
+  configs[:db_port] = ENV['db_port']
+  ENV['db_port'] = nil
 
-    flags.on('-t', '--release-type RELEASE', 'The type of the SNOMED release (DELTA, SNAP, FULL, or ALL)') do |release_type|
-      configs[:release_type] = release_type;
-    end
+  configs[:db_username] = ENV['db_username']
+  ENV['db_username'] = nil
 
-    flags.separator ""
-    flags.separator "Database configurations:"
+  configs[:db_password] = ENV['db_password']
+  ENV['db_password'] = nil
 
-    configs[:db_name] = nil
-
-    flags.on('-d', '--dbname DBNAME', 'The database name to connect to') do |db_name|
-      configs[:db_name] = db_name;
-    end
-
-    configs[:db_host] = nil
-
-    flags.on('-h', '--host HOSTNAME', 'The database server host or socket directory') do |db_host|
-      configs[:db_host] = db_host;
-    end
-
-    configs[:db_port] = nil
-
-    flags.on('-p', '--port PORT', 'The database server port') do |db_port|
-      configs[:db_port] = db_port;
-    end
-
-    configs[:db_username] = nil
-
-    flags.on('-u', '--username USERNAME', 'The database user name') do |db_username|
-      configs[:db_username] = db_username;
-    end
-
-    configs[:db_password] = nil
-
-    flags.on('-w', '--password PASSWORD', 'The database password') do |db_password|
-      configs[:db_password] = db_password;
-    end
-
-    flags.separator ""
-    flags.separator ""
-    flags.separator "== Other (optional) =="
-
-    flags.on_tail("-H", "--help", "Display this help and exit") do
-      puts flags
-
-      exit
-    end
-  end
-
-  args = parser.order!(ARGV)
-
-  # parse the command-line arguments
-  parser.parse!(args)
+  # TODO: remove
+  puts configs
 
   validate_configurations(configs, task_name)
 end
