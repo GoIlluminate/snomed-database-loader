@@ -7,7 +7,10 @@ require 'rbconfig'
 @os = RbConfig::CONFIG['host_os']
 
 # configurations for SNOMED CT import
-configs = {}
+configs = {
+  # the location of the SNOMED release archive in the Docker container
+  docker_release_path: "/snomed/SnomedCT.zip"
+}
 
 def docker_command
     if @os.downcase.include?('linux')
@@ -24,7 +27,7 @@ def validate_configurations(configurations, calling_task_name)
   end
 
   config_descriptions = {
-    release_path: "the path to the SNOMED archive",
+    local_release_path: "the path to the SNOMED archive",
     module_name: "the name of the SNOMED module",
     release_type: "the type of the SNOMED release",
     db_name: "the database name",
@@ -66,10 +69,10 @@ task :get_configurations do |task_name|
     flags.separator ""
     flags.separator "SNOMED CT release configurations:"
 
-    configs[:release_path] = nil
+    configs[:local_release_path] = nil
 
     flags.on('-l', '--release-path PATH', 'The path to the SNOMED CT release archive') do |release_path|
-      configs[:release_path] = release_path;
+      configs[:local_release_path] = release_path;
     end
 
     configs[:module_name] = nil
@@ -137,16 +140,18 @@ task :get_configurations do |task_name|
 end
 
 task :postgres_build do 
-    sh("#{docker_command} build -t snomedps:latest .")
+    sh("#{docker_command} build -t snomedps:latest --build-arg local_release_path=#{configs[:local_release_path]} --build-arg docker_release_path=#{configs[:docker_release_path]} .")
 end
 
 task :postgres_run => [:get_configurations] do
     containerID = `#{docker_command} ps -a -q -f name=snomedps`
 
+    # eliminate the container with extreme prejudice if it's already running
     if containerID != ""
-        sh("#{docker_command} stop $(#{docker_command} ps -a -q -f name=snomedps) && #{docker_command} rm $(#{docker_command} ps -a -q -f name=snomedps);")
+      puts("SNOMED database container already running! Stopping...")
+      sh("#{docker_command} stop $(#{docker_command} ps -a -q -f name=snomedps) && #{docker_command} rm $(#{docker_command} ps -a -q -f name=snomedps);")
     end
 
-    sh("#{docker_command} run --name snomedps -d -e POSTGRES_USER=#{configs[:db_username]} -e POSTGRES_PASS=#{configs[:db_password]} -e POSTGRES_DATABASE=#{configs[:db_name]} -p 5432:#{configs[:db_port]} snomedps")
-    sh("#{docker_command} exec snomedps ../scripts/load_release-postgresql.sh -l #{configs[:release_path]} -m #{configs[:module_name]} -t #{configs[:release_type]} -d #{configs[:db_name]} -h #{configs[:db_host]} -p 5432 -u #{configs[:db_username]}")
+    sh("#{docker_command} run --name snomedps -d -e POSTGRES_USER=#{configs[:db_username]} -e POSTGRES_PASS=#{configs[:db_password]} -e POSTGRES_DATABASE=#{configs[:db_name]} -p #{configs[:db_port]}:5432 snomedps")
+    sh("#{docker_command} exec snomedps ../scripts/load_release-postgresql.sh -l #{configs[:docker_release_path]} -m #{configs[:module_name]} -t #{configs[:release_type]} -d #{configs[:db_name]} -h #{configs[:db_host]} -p #{configs[:db_port]} -u #{configs[:db_username]}")
 end
