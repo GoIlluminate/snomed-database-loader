@@ -159,7 +159,6 @@ fi
 # Unzip the files here, junking the structure
 localExtract="tmp_extracted"
 generatedLoadScript="tmp_loader.sql"
-generatedEnvScript="tmp_environment-postgresql.sql"
 
 # What types of files are we loading - delta, snapshot, full or all?
 case "${releaseType}" in 
