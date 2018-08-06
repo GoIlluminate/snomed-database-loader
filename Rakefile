@@ -1,4 +1,3 @@
-require 'optparse'
 require 'standalone_migrations'
 require 'yaml'
 require 'zip'
@@ -77,7 +76,7 @@ task :config_help do
   puts "SNOMED CT release configurations:"
   puts "  release_path=PATH           The path to the SNOMED CT release archive"
   puts "  module_name=MODULE_NAME     The name of the SNOMED module"
-  puts "  release_type=RELEASE        The type of the SNOMED release (DELTA, SNAP, FULL, or ALL)"
+  puts "  release_type=TYPE           The type of the SNOMED release (DELTA, SNAP, FULL, or ALL)"
   puts ""
   puts "Database configurations:"
   puts "  db_name=DBNAME              The database name to connect to"
@@ -112,9 +111,6 @@ task :get_configurations do |task_name|
 
   configs[:db_password] = ENV['db_password']
   ENV['db_password'] = nil
-
-  # TODO: remove
-  puts configs
 
   validate_configurations(configs, task_name)
 end
