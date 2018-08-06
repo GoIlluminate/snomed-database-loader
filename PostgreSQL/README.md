@@ -6,9 +6,15 @@ SQL scripts to create and populate a PostgreSQL database with a SNOMED CT termin
 
 ## Minimum Specification
 
-- PostgreSQL v9
+* PostgreSQL v9
+* unzip
 
-## Scripted Installation (Mac & Unix)
+## Automated Installation for Mac and Unix
+
+### Mac and Unix
+
+**NOTE:** This installation assumes a database is already up and running.
+
 
 `./load_release-postgresql.sh -l <release location> -m <module name> -t <release type> -d <database name> -h <database host> -p <database port> -u <database user name>`
 
@@ -29,7 +35,7 @@ Example: `./load_release-postgresql.sh -l ~/Documents/SnomedCT_RF2Release_US1000
 
 Run `./load_release-postgresql.sh -H` to see the help menu.
 
-## Manual Installation
+## Manual Installation (untested)
 
 1. Download the SNOMED CT terminology release from the IHTSDO website.
 2. Create the database using the `create-database-postgres.sql` script.
