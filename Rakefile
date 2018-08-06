@@ -125,7 +125,8 @@ task :postgres_run => [:get_configurations] do
     # eliminate the container with extreme prejudice if it's already running
     if containerID != ""
       puts("SNOMED database container already running! Stopping...")
-      sh("#{docker_command} stop $(#{docker_command} ps -a -q -f name=snomedps) && #{docker_command} rm $(#{docker_command} ps -a -q -f name=snomedps);")
+      sh("#{docker_command} stop")
+      sh("#{docker_command} rm snomedps;")
     end
 
     sh("#{docker_command} run --name snomedps -d -e POSTGRES_USER=#{configs[:db_username]} -e POSTGRES_PASS=#{configs[:db_password]} -e POSTGRES_DB=#{configs[:db_name]} -p #{configs[:db_port]}:5432 snomedps")
