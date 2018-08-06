@@ -24,6 +24,7 @@ If you have any scripts for other databases, please fork this repository and cre
 
 * [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
 * [Docker](https://docs.docker.com/)
+* [Git LFS](https://git-lfs.github.com/) (to download the release archive in the repository)
 
 <a name="postgresql-instructions"/>
 
