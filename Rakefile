@@ -130,5 +130,5 @@ task :postgres_run => [:get_configurations] do
     end
 
     sh("#{docker_command} run --name snomedps -d -e POSTGRES_USER=#{configs[:db_username]} -e POSTGRES_PASS=#{configs[:db_password]} -e POSTGRES_DB=#{configs[:db_name]} -p #{configs[:db_port]}:5432 snomedps")
-    sh("#{docker_command} exec snomedps ../scripts/load_release-postgresql.sh -l #{configs[:docker_release_path]} -m #{configs[:module_name]} -t #{configs[:release_type]} -d #{configs[:db_name]} -h #{configs[:db_host]} -p #{configs[:db_port]} -u #{configs[:db_username]}")
+    sh("#{docker_command} exec snomedps /scripts/load_release-postgresql.sh -l #{configs[:docker_release_path]} -m #{configs[:module_name]} -t #{configs[:release_type]} -d #{configs[:db_name]} -h #{configs[:db_host]} -p #{configs[:db_port]} -u #{configs[:db_username]}")
 end
